@@ -132,7 +132,7 @@ read_metainfo <- function(file, markup = NULL)
 
   ## Description ###################################
   extype <- match.arg(extract_command(x, "extype", markup = markup), ## exercise type: schoice, mchoice, num, string, or cloze
-    c("schoice", "mchoice", "num", "string", "cloze"))  
+    c("schoice", "mchoice", "num", "string", "cloze", "description"))  
   exname <- extract_command(x, "exname", markup = markup)            ## short name/description, only to be used for printing within R
   extitle <- extract_command(x, "extitle", markup = markup)          ## pretty longer title
   exsection <- extract_command(x, "exsection", markup = markup)      ## sections for groups of exercises, use slashes for subsections (like URL)
@@ -174,6 +174,7 @@ read_metainfo <- function(file, markup = NULL)
     "mchoice" = string2mchoice(exsolution),
     "num" = as.numeric(exsolution),
     "string" = exsolution,
+    "description" = exsolution,
     "cloze" = {
       if(is.null(exclozetype)) {
         warning("no exclozetype specified, taken to be string")

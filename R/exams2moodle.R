@@ -4,7 +4,7 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
   name = NULL, quiet = TRUE, edir = NULL, tdir = NULL, sdir = NULL, verbose = FALSE,
   resolution = 100, width = 4, height = 4, svg = FALSE, encoding = "", 
   iname = TRUE, stitle = NULL, testid = FALSE, zip = FALSE,
-  num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, cloze = NULL,
+  num = NULL, mchoice = NULL, schoice = mchoice, string = NULL, description=NULL, cloze = NULL,
   points = NULL, rule = NULL, pluginfile = TRUE,
   converter = "pandoc-mathjax", envir = NULL, ...)
 {
@@ -26,9 +26,9 @@ exams2moodle <- function(file, n = 1L, nsamp = NULL, dir = ".",
      dir = dir, edir = edir, tdir = tdir, sdir = sdir, verbose = verbose)
 
   ## get the possible moodle question body functions and options
-  moodlequestion = list(num = num, mchoice = mchoice, schoice = schoice, cloze = cloze, string = string)
+  moodlequestion = list(num = num, mchoice = mchoice, schoice = schoice, cloze = cloze, string = string, description=description)
 
-  for(i in c("num", "mchoice", "schoice", "cloze", "string")) {
+  for(i in c("num", "mchoice", "schoice", "cloze", "string", "description")) {
     if(is.null(moodlequestion[[i]])) moodlequestion[[i]] <- list()
     if(is.list(moodlequestion[[i]])) {
       if(is.null(moodlequestion[[i]]$eval))
@@ -233,7 +233,8 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       "mchoice" = "multichoice",
       "schoice" = "multichoice",
       "cloze" = "cloze",
-      "string" = "shortanswer"
+      "string" = "shortanswer",
+      "description" = "description"
     )
 
     if(type == "shortanswer" && (isTRUE(x$metainfo$essay) || isTRUE(essay))) {
@@ -326,6 +327,16 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
       }
     }
 
+    
+    ## description question processing
+    if(type == "description") {
+      xml <- c(xml,
+        '<defaultgrade>0.0000000</defaultgrade>',
+        '<penalty>0.0000000</penalty>',
+        '<hidden>0</hidden>'
+      )
+    }
+    
     ## numeric question processing
     if(type == "numerical") {
       xml <- c(xml,
