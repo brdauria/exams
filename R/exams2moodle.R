@@ -360,7 +360,7 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
     ## string/essay questions
     if(type == "essay") {
         essay_opts <- list(format="plain", required=TRUE, fieldlines=5L,
-            attachments=0L, attachmentsrequired=FALSE)
+            attachments=0L, attachmentsrequired=FALSE, solution2graderinfo=FALSE)
 
         if(!is.list(essay)) {
             essay <- list()
@@ -377,6 +377,23 @@ make_question_moodle23 <- function(name = NULL, solution = TRUE, shuffle = FALSE
 
         for(i in names(essay_opts)) {
             if(!is.null(essay[[i]])) essay_opts[[i]] <- essay[[i]]
+        }
+        
+        ## insert the solution as graderinfo if solution2graderinfo is TRUE
+        if(essay_opts$solution2graderinfo && (length(x$solution) | (nsol <- length(x$solutionlist))) && solution) {
+          xml <- c(xml,
+                   '<graderinfo format="html">',
+                   '<text><![CDATA[<p>', x$solution,
+                   if(!type %in% c("mchoice", "schoice") && nsol) {
+                     g <- rep(seq_along(x$metainfo$solution), sapply(x$metainfo$solution, length))
+                     soll <- sapply(split(x$solutionlist, g), paste, collapse = " / ")
+                     c(if(enumerate) '<ol type = "a">' else '</br>',
+                       paste(if(enumerate) "<li>" else NULL, soll, if(enumerate) "</li>" else NULL),
+                       if(enumerate) '</ol>' else NULL)
+                   } else NULL,
+                   '</p>]]></text>',
+                   '</graderinfo>'
+          )
         }
 
         txt <- paste0(
